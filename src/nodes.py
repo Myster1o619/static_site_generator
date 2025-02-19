@@ -52,10 +52,6 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             updated_dest_path = os.path.join(dest_dir_path, item)
             generate_pages_recursive(path_to_item, template_path, updated_dest_path)
 
-        pass
-    print(template_path)
-    print(dest_dir_path)
-
 
 def generate_page(from_path, template_path, dest_path, file_item):
     # get the markdown file
@@ -330,134 +326,6 @@ def build_html_nodes_after_markdown_split(node):
             parent_node = build_parent_with_children(text_node)
             html_string = node_to_html(parent_node)
             html_string_container_for_main_parent_div.append(html_string)
-                        
-                    # else:
-                    #     parent_node = build_parent_with_children(text_node)     
-                    #     html_string = node_to_html(parent_node)
-                    #     html_string_container_for_main_parent_div.append(html_string)
-                    # if no_lists == True:
-                    #     break
-
-
-
-
-    # if isinstance(node, list):
-    #     for text_node in node:
-    #         parent_node = None
-    #         children_of_parent = []
-    #         html_string = ""
-    #         # check for standalone heading:
-    #         if not isinstance(text_node, list) and "h" in text_node["text_type"].value:
-    #             html_header_string = heading_node_to_html(text_node)
-    #             html_string_container_for_main_parent_div.append(html_header_string)
-    #         # check if length of text_node is greater than 1, if yes, then build parent + children
-    #         if isinstance(text_node, list) and len(text_node) >= 1:
-    #             # if it is a list, every item in list will be part of the ul/ol
-    #             if text_node[0]["text_type"] == TextType.U_LIST or text_node[0]["text_type"] == TextType.O_LIST:
-    #                 list_html_container = list_node_to_html(text_node)
-    #                 html_string_container_for_main_parent_div.append(list_html_container)
-    #                 # print(html_string_container_for_main_parent_div)
-    #             # find if there is a link?
-    #         if text_node[0]["text_type"] != TextType.U_LIST and text_node[0]["text_type"] != TextType.O_LIST:
-    #             if len(text_node) == 1:
-    #                 parent_node = build_parent_with_children(text_node[0])
-    #             elif (len(text_node) > 1):
-    #                 no_lists = True
-    #                 found_list_index = None
-    #                 for i in range(0, len(text_node)):
-    #                     if isinstance(text_node[i], list):
-    #                         no_lists = False
-    #                         found_list_index = i
-    #                 if no_lists:
-    #                     parent_node = build_parent_with_children(text_node)
-    #                 else:
-    #                     parent_node = build_parent_with_children(text_node[found_list_index])
-    #             else:
-    #                 parent_node = build_parent_with_children(text_node)
-    #             if parent_node:       
-    #                 html_string = node_to_html(parent_node)
-    #                 html_string_container_for_main_parent_div.append(html_string)
-    #                 if no_lists == True:
-    #                     break
-
-
-
-
-
-
-
-
-                # for item in text_node:
-                #     if isinstance(item, list):
-                #         for node in item:
-                #             if node["text_type"] == TextType.LINK:
-                #                 #we have found a link, need to remove item and build separately?
-                #                 link_node = item
-                #                 text_node.remove(item)
-                #                 parent_node = build_parent_with_children(link_node)
-                #                 if parent_node:       
-                #                     html_string = node_to_html(parent_node)
-                #                     html_string_container_for_main_parent_div.append(html_string)
-                            # else:
-                            #     parent_node = build_parent_with_children(item)
-                            #     if parent_node:       
-                            #         html_string = node_to_html(parent_node)
-                            #         html_string_container_for_main_parent_div.append(html_string)
-
-                    # elif text_node[0]["text_type"] != TextType.U_LIST and text_node[0]["text_type"] != TextType.O_LIST:
-                    #     if len(text_node) == 1:
-                    #         parent_node = build_parent_with_children(text_node[0])
-                    #     elif (len(text_node) > 1):
-                    #         no_lists = True
-                    #         for i in range(0, len(text_node)):
-                    #             if isinstance(text_node[i], list):
-                    #                 no_lists = False
-                    #         if no_lists:
-                    #             parent_node = build_parent_with_children(text_node)
-                    #         else:
-                    #             parent_node = build_parent_with_children(text_node[0])
-                    #     else:
-                    #         parent_node = build_parent_with_children(text_node)
-                    #     if parent_node:       
-                    #         html_string = node_to_html(parent_node)
-                # if html_string_container_for_main_parent_div != []:
-                #     if html_string_container_for_main_parent_div[0] == None:
-                #         html_string_container_for_main_parent_div.pop(0)
-                #         html_string_container_for_main_parent_div.insert(0, html_string)
-                # else:
-                            # html_string_container_for_main_parent_div.append(html_string)
-                            # if no_lists == True:
-                            #     break
-                
-                # build parent and children
-                # first element in list is the parent, build parent and children accordingly
-                # if text_node[0]["text_type"] != TextType.U_LIST and text_node[0]["text_type"] != TextType.O_LIST:
-                #     parent_node = build_parent_with_children(text_node)
-                # if parent_node and parent_node["text"]:
-                #     parent_text = parent_node["text"].strip()
-                #     if parent_text != "":
-                #         #the text here becomes a leaf node:
-                #         child_text_node = create_text_node(TextType.TEXT, parent_node["text"])
-                #         children_of_parent.append(text_node_to_html_node(child_text_node))
-                # if parent_node:
-                #     parent_node = text_node_to_parent_html_node(parent_node)
-                # # start loop at 1/second item => the first item is the parent built above
-                # if parent_node:
-                #     # for i in range(1, len(parent_node) -1):
-                #     for i in range(1, len(text_node)):
-                #         child_node = text_node_to_html_node(text_node[i])
-                #         children_of_parent.append(child_node)
-                # if parent_node:
-                #     parent_node["children"] = children_of_parent
-
-            # if parent_node:       
-            #     html_string = node_to_html(parent_node)
-            #     if html_string_container_for_main_parent_div != []:
-            #         if html_string_container_for_main_parent_div[0] == None:
-            #             html_string_container_for_main_parent_div.pop(0)
-            #             html_string_container_for_main_parent_div.insert(0, html_string)
-            #     else:
-            #         html_string_container_for_main_parent_div.append(html_string)
     
     return html_string_container_for_main_parent_div
 
@@ -1169,9 +1037,7 @@ def check_for_sequential_numbers(split_text):
             numbers.clear()
     return numbers
 
-"""
-The two functions are currently not being used:
-"""
+''' Currently not in use
 def extract_markdown_images(text):
     # images
     pattern = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
@@ -1183,9 +1049,7 @@ def extract_markdown_links(text):
     pattern = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
     extracted_text = re.findall(rf"{pattern}", text)
     return extracted_text
-"""
-The two functions ABOVE are currently not being used
-"""
+'''
 
 def split_nodes_image(old_nodes):
     new_node_list = []
