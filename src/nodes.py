@@ -593,6 +593,8 @@ def text_node_to_parent_html_node(text_node):
         case TextType.QUOTE:
             return create_parent_node(NodeType.PARENT_NODE, tag = "blockquote", children = [])
         case TextType.LINK:
+            if text_node["text"] == "" and text_node["alt_text"] != "":
+                text_node["text"] = text_node["alt_text"]
             return create_parent_node(NodeType.PARENT_NODE, tag = "a", children = [], props = {"href": text_node["href"]})
         case TextType.IMAGE:
             return create_parent_node(NodeType.PARENT_NODE, tag = "img", children = [], props = {
@@ -622,8 +624,6 @@ def text_node_to_html_node(text_node):
         case TextType.LINK:
             if text_node["text"] == "" and text_node["alt_text"] != "":
                 text_node["text"] = text_node["alt_text"]
-                # url/img
-                # alt_text
             return create_leaf_node(NodeType.LEAF_NODE, tag = "a", value = text_node["text"], props = {"href": text_node["href"]})
         case TextType.IMAGE:
             return create_leaf_node(NodeType.LEAF_NODE, tag = "img", value = "", props = {
