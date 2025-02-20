@@ -35,9 +35,7 @@ def extract_title(html_string):
 
 
 def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
-    print(dir_path_content)
     dir_path_content_items = os.listdir(dir_path_content)
-    print(dir_path_content_items)
     for item in dir_path_content_items:
         # if item is file, add dir_path_content + item for path of md file
         # template path should stay the same
@@ -626,7 +624,7 @@ def text_node_to_html_node(text_node):
                 text_node["text"] = text_node["alt_text"]
                 # url/img
                 # alt_text
-            return create_leaf_node(NodeType.LEAF_NODE, tag = "a", value = text_node["text"], props = {"href": text_node["url/img"]})
+            return create_leaf_node(NodeType.LEAF_NODE, tag = "a", value = text_node["text"], props = {"href": text_node["href"]})
         case TextType.IMAGE:
             return create_leaf_node(NodeType.LEAF_NODE, tag = "img", value = "", props = {
                 "src": text_node["url/img"],
