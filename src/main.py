@@ -46,7 +46,7 @@ def build_new_public_folder():
         print("Correct directory - proceed to public folder creation")
         os.mkdir("public")
         print("Does public folder exist:")
-        print(f"{os.path.exists("public")}")
+        # print(f"{os.path.exists("public")}")
         proceed_to_copy = do_static_and_public_exist()
         website_folder_available = does_website_exist()
         if proceed_to_copy:
@@ -77,7 +77,6 @@ def do_static_and_public_exist():
 def does_website_exist():
     is_there_website_folder = os.path.exists("website")
     return is_there_website_folder
-
 
 def copy_static_move_to_public(source_folder, destination_folder):
     # make sure destination folder exists, if not: create folder
@@ -137,9 +136,9 @@ def copy_website_move_to_public(source_folder, destination_folder):
 #     "file": "index.html"
 # })
 
-main()
-# generate_pages_recursive(dir_path_content = "src/content/", template_path = "template.html", dest_dir_path = "website") 
 check_current_directory()
+main(dir_path_content = "src/content/", template_path = "template.html", dest_dir_path = "website")
+# generate_pages_recursive(dir_path_content = "src/content/", template_path = "template.html", dest_dir_path = "website") 
 
 
 

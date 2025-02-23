@@ -16,24 +16,22 @@ def str_representation_of_node(node_obj):
 # for debugging purposes
 
 def extract_title(html_string):
-    # TODO: don't forget to uncomment some of this
-    # found = False
+    # return "title", html_string
+    found = False
     # loop through html - look for first h1 tag and extract title
     # if no h1 tag found, raise exception
-    # for i in range(0, len(html_string)):
-    #     text_to_check = html_string[i]
-    #     if text_to_check.startswith("<h1>") and text_to_check.endswith("</h1>"):
-    #         title = re.sub(r'<[^>]+>', '', text_to_check)
-    #         title = title.strip()
-    #         found = True
-    #         break
-    # if found == False:
-    #     raise Exception("Markdown must contain a title (h1 header)")
-    # else:
-    #     return title, html_string
-        return "title", html_string
-
-
+    for i in range(0, len(html_string)):
+        text_to_check = html_string[i]
+        if text_to_check.startswith("<h1>") and text_to_check.endswith("</h1>"):
+            title = re.sub(r'<[^>]+>', '', text_to_check)
+            title = title.strip()
+            found = True
+            break
+    if found == False:
+        raise Exception("Markdown must contain a title (h1 header)")
+    else:
+        return title, html_string
+    
 def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
     dir_path_content_items = os.listdir(dir_path_content)
     for item in dir_path_content_items:
@@ -288,7 +286,7 @@ def build_html_nodes_after_markdown_split_old(node):
 
 def build_html_nodes_after_markdown_split(node):
     html_string_container_for_main_parent_div = []
-    # TODO: check for image node and build accordingly
+    # TODO: check for image node and build accordingly - handled?
     for text_node in node:
         if not isinstance(text_node, list) and "h" in text_node["text_type"].value:
             html_header_string = heading_node_to_html(text_node)
@@ -316,6 +314,14 @@ def build_html_nodes_after_markdown_split(node):
                 html_string = node_to_html(parent_node)
                 html_string_container_for_main_parent_div.append(html_string)
             else:
+                if text_node[0]["text_type"] == TextType.BOLD and text_node[0]["text"] != "":
+                    # this is a hack for bold text
+                    parent_node = build_parent_with_children(text_node[0])
+                    html_string = node_to_html(parent_node)
+                    html_string_container_for_main_parent_div.append(html_string)
+                    text_node.remove(text_node[0])
+                    parent_node = None
+
                 parent_node = build_parent_with_children(text_node)
                 html_string = node_to_html(parent_node)
                 html_string_container_for_main_parent_div.append(html_string)
@@ -453,7 +459,6 @@ def props_to_html(props):
     return props_to_string
 
 def heading_node_to_html(node):
-    # TODO: need to check for embedded here as well?
     #build opening and closing tags corresponding to heading value
     embedded_formatting_node_update = check_for_embedded_style(node)
     match embedded_formatting_node_update["text_type"]:
@@ -728,8 +733,12 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                     # pattern = r"(?=\* )"
 
                     # pattern = r"(?=\* .*\n\* )"
+                    
                     pattern = r"(?<=\n)(?=\* )|(?<=^)(?=\* )"
-                    extract_pattern = r"\* (.*?)(\n|$)"
+                    # pattern = r"(?<=\n)\* |^\* "
+                    
+                    extract_pattern = r"^\* (.*?)(\n|$)"
+                    # extract_pattern = r"\* (.*?)(\n|$)"
 
                     # result = []
                     matches = []
@@ -739,14 +748,18 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
                             continue
                         # match = re.findall(pattern, txt)
                         # matches = re.findall(extract_pattern, txt)
-                        matches.extend(re.findall(extract_pattern, txt))
-                    if matches:
-                        list_found = True
+                        # matches.extend(re.findall(extract_pattern, txt))
+                        match = re.match(extract_pattern, txt)
+                        if match:
+                            matches.append(match.group(1).strip())
+                            list_found = True
                         # loop through the matches and add to new node list accordingly
+                    if matches:
                         for match in matches:
-                            extracted_value = match[0].strip()
+                            # extracted_value = match[0].strip()
                             new_node_list.append(
-                                create_text_node(text_type, extracted_value)
+                                # create_text_node(text_type, extracted_value)
+                                create_text_node(text_type, match)
                             )
                     else:
                         for txt in split_node_text:
@@ -884,10 +897,10 @@ def check_for_embedded_style(node):
             if len(split_node_text) == 1:
                 # clean split, continue?
                 continue
-            for j in range(0, len(split_node_text)):
-                # remove empty strings
-                if split_node_text[j] == "" or split_node_text[j] == " ":
-                    split_node_text.remove(split_node_text[j])
+            # for j in range(0, len(split_node_text)):
+            #     # remove empty strings
+            #     if split_node_text[j] == "" or split_node_text[j] == " ":
+            #         split_node_text.remove(split_node_text[j])
             for i in range(0, len(split_node_text)):
                 # remove markdown and build necessary html
                 found_symbol = split_node_text[i].startswith(DelimiterType.ITALIC_DEL.value) and split_node_text[i].endswith(DelimiterType.ITALIC_DEL.value)
@@ -898,16 +911,20 @@ def check_for_embedded_style(node):
                     split_node_text.insert(i, new_txt)
                     updated_tag_text = ''.join(split_node_text)
                     item["text"] = updated_tag_text
+            # for j in range(0, len(split_node_text)):
+            #     # remove empty strings
+            #     if split_node_text[j] == "" or split_node_text[j] == " ":
+            #         split_node_text.remove(split_node_text[j])
     elif italics_found and not isinstance(node, list):
             pattern = r"(\*[^*]+\*)"
             split_node_text = re.split(pattern, node["text"])
             if len(split_node_text) == 1:
                 # clean split, continue?
                 return node
-            for j in range(0, len(split_node_text)):
-                # remove empty strings
-                if split_node_text[j] == "" or split_node_text[j] == " ":
-                    split_node_text.remove(split_node_text[j])
+            # for j in range(0, len(split_node_text)):
+            #     # remove empty strings
+            #     if split_node_text[j] == "" or split_node_text[j] == " ":
+            #         split_node_text.remove(split_node_text[j])
             for i in range(0, len(split_node_text)):
                 # remove markdown and build necessary html
                 found_symbol = split_node_text[i].startswith(DelimiterType.ITALIC_DEL.value) and split_node_text[i].endswith(DelimiterType.ITALIC_DEL.value)
@@ -926,10 +943,10 @@ def check_for_embedded_style(node):
             if len(split_node_text) == 1:
                 # clean split, continue?
                 continue
-            for j in range(0, len(split_node_text)):
-                # remove empty strings
-                if split_node_text[j] == "" or split_node_text[j] == " ":
-                    split_node_text.remove(split_node_text[j])
+            # for j in range(0, len(split_node_text)):
+            #     # remove empty strings
+            #     if split_node_text[j] == "" or split_node_text[j] == " ":
+            #         split_node_text.remove(split_node_text[j])
             for i in range(0, len(split_node_text)):
                 # remove markdown and build necessary html
                 found_symbol = split_node_text[i].startswith(DelimiterType.BOLD_DEL.value) and split_node_text[i].endswith(DelimiterType.BOLD_DEL.value)
@@ -940,6 +957,10 @@ def check_for_embedded_style(node):
                     split_node_text.insert(i, new_txt)
                     updated_tag_text = ''.join(split_node_text)
                     item["text"] = updated_tag_text
+            # for j in range(0, len(split_node_text)):
+            #     # remove empty strings
+            #     if split_node_text[j] == "" or split_node_text[j] == " ":
+            #         split_node_text.remove(split_node_text[j])
 
     elif bold_found and not isinstance(node, list):
         pattern = r"(\*\*[^*]+\*\*)"
@@ -947,10 +968,10 @@ def check_for_embedded_style(node):
         if len(split_node_text) == 1:
             # clean split, continue?
             return node
-        for j in range(0, len(split_node_text)):
-            # remove empty strings
-            if split_node_text[j] == "" or split_node_text[j] == " ":
-                split_node_text.remove(split_node_text[j])
+        # for j in range(0, len(split_node_text)):
+        #     # remove empty strings
+        #     if split_node_text[j] == "" or split_node_text[j] == " ":
+        #         split_node_text.remove(split_node_text[j])
         for i in range(0, len(split_node_text)):
             # remove markdown and build necessary html
             found_symbol = split_node_text[i].startswith(DelimiterType.BOLD_DEL.value) and split_node_text[i].endswith(DelimiterType.BOLD_DEL.value)
@@ -969,10 +990,10 @@ def check_for_embedded_style(node):
             if len(split_node_text) == 1:
                 # clean split, continue?
                 continue
-            for j in range(0, len(split_node_text)):
-                # remove empty strings
-                if split_node_text[j] == "" or split_node_text[j] == " ":
-                    split_node_text.remove(split_node_text[j])
+            # for j in range(0, len(split_node_text)):
+            #     # remove empty strings
+            #     if split_node_text[j] == "" or split_node_text[j] == " ":
+            #         split_node_text.remove(split_node_text[j])
             for i in range(0, len(split_node_text)):
                 # remove markdown and build necessary html
                 found_symbol = split_node_text[i].startswith(DelimiterType.CODE_DEL.value) and split_node_text[i].endswith(DelimiterType.CODE_DEL.value)
@@ -990,10 +1011,10 @@ def check_for_embedded_style(node):
         if len(split_node_text) == 1:
             # clean split, continue?
             return node
-        for j in range(0, len(split_node_text)):
-            # remove empty strings
-            if split_node_text[j] == "" or split_node_text[j] == " ":
-                split_node_text.remove(split_node_text[j])
+        # for j in range(0, len(split_node_text)):
+        #     # remove empty strings
+        #     if split_node_text[j] == "" or split_node_text[j] == " ":
+        #         split_node_text.remove(split_node_text[j])
         for i in range(0, len(split_node_text)):
             # remove markdown and build necessary html
             found_symbol = split_node_text[i].startswith(DelimiterType.CODE_DEL.value) and split_node_text[i].endswith(DelimiterType.CODE_DEL.value)
@@ -1174,7 +1195,9 @@ def split_nodes_link(old_nodes):
                 # new_node_list.append(link_container)
     return new_node_list, list_found
 
-def main():
-    generate_pages_recursive(dir_path_content = "src/content/", template_path = "template.html", dest_dir_path = "website") 
+def main(dir_path_content, template_path, dest_dir_path):
+# def main():
+#     generate_pages_recursive(dir_path_content = "src/content/", template_path = "template.html", dest_dir_path = "website") 
+    generate_pages_recursive(dir_path_content, template_path, dest_dir_path) 
 
-main()
+# main()
